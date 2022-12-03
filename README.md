@@ -124,4 +124,3 @@ Compile it:
 `./a.out < hello-text`
 
 **Output**: `The number of hellos is = 4 The number of lines is= 5`
-\\
