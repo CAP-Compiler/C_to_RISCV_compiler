@@ -1,0 +1,7 @@
+a = 1 + 1;
+print a;
+b = 1 + 2;
+c = a;
+print c;
+d = c + b;
+print d;
