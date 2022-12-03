@@ -4,4 +4,4 @@
 
 # Feature future
 
-- Una symbolTable miglioarta
+- Una symbolTable migliorata
