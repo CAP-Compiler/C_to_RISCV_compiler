@@ -71,17 +71,18 @@
 
 void yyerror (char *s);
 int yylex();
+extern int yylineno;
 
 #include <stdio.h>     /* C declarations used in actions */
 #include <stdlib.h>
 #include <ctype.h>
 #include "SymbolTable.h"
+#include "ErrorHandler.h"
 
-/*ragionare su cosa sia meglio per salvare le variabili*/
-
+/*la mia symbol table è una struttura descritta dentro SymbolTable.h*/
 sym symbols;
 
-#line 85 "y.tab.c"
+#line 86 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -152,13 +153,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 15 "compiler.y"
+#line 17 "compiler.y"
 
 	int num; 
 	float Fnum;
-	char id;
+	char id; 
 
-#line 162 "y.tab.c"
+#line 163 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -194,13 +195,10 @@ enum yysymbol_kind_t
   YYSYMBOL_13_ = 13,                       /* '-'  */
   YYSYMBOL_YYACCEPT = 14,                  /* $accept  */
   YYSYMBOL_principal = 15,                 /* principal  */
-  YYSYMBOL_IntDefAssignment = 16,          /* IntDefAssignment  */
-  YYSYMBOL_FloatDefAssignament = 17,       /* FloatDefAssignament  */
-  YYSYMBOL_IntDefinition = 18,             /* IntDefinition  */
-  YYSYMBOL_FloatDefinition = 19,           /* FloatDefinition  */
-  YYSYMBOL_assignment = 20,                /* assignment  */
-  YYSYMBOL_exp = 21,                       /* exp  */
-  YYSYMBOL_term = 22                       /* term  */
+  YYSYMBOL_Variables = 16,                 /* Variables  */
+  YYSYMBOL_Stamp = 17,                     /* Stamp  */
+  YYSYMBOL_exp = 18,                       /* exp  */
+  YYSYMBOL_term = 19                       /* term  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -526,18 +524,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  17
+#define YYFINAL  14
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   48
+#define YYLAST   36
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  14
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  9
+#define YYNNTS  6
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  26
+#define YYNRULES  19
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  52
+#define YYNSTATES  36
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   264
@@ -587,9 +585,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    46,    46,    47,    48,    49,    50,    51,    52,    60,
-      61,    62,    63,    64,    65,    74,    78,    81,    84,    87,
-      91,    98,    99,   100,   103,   104,   105
+       0,    49,    49,    50,    51,    52,    53,    54,    58,    59,
+      60,    61,    62,    73,    84,    85,    86,    90,    91,    92
 };
 #endif
 
@@ -608,8 +605,7 @@ static const char *const yytname[] =
   "\"end of file\"", "error", "\"invalid token\"", "print",
   "exit_command", "integer", "floatin", "identifier", "IntNumber",
   "FloatNumber", "';'", "'='", "'+'", "'-'", "$accept", "principal",
-  "IntDefAssignment", "FloatDefAssignament", "IntDefinition",
-  "FloatDefinition", "assignment", "exp", "term", YY_NULLPTR
+  "Variables", "Stamp", "exp", "term", YY_NULLPTR
 };
 
 static const char *
@@ -619,7 +615,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-30)
+#define YYPACT_NINF (-15)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -633,12 +629,10 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       5,    13,    11,    15,    16,    14,     0,    17,    18,    19,
-      20,    21,    22,   -30,    23,    24,     6,   -30,    26,    27,
-      28,    29,    30,    31,    32,   -30,   -30,   -30,   -30,   -30,
-     -30,     6,     6,   -30,   -30,   -30,   -11,   -30,    33,   -30,
-     -30,   -30,   -30,   -30,   -30,   -11,   -11,     6,     6,   -30,
-     -30,   -30
+       5,    13,    11,    15,    16,    14,     0,    17,    18,   -15,
+     -15,    19,    20,     6,   -15,    22,    23,    24,   -15,   -15,
+       6,     6,   -15,   -15,   -15,   -11,   -15,   -15,   -15,   -15,
+     -11,   -11,     6,     6,   -15,   -15
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -646,24 +640,22 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     7,    18,    19,     0,     1,     0,     0,
-       0,     0,     0,     0,     0,     4,     5,     3,     6,     2,
-       8,     0,     0,    26,    24,    25,    20,    21,     0,    15,
-      10,    12,    11,    13,     9,    16,    17,     0,     0,    14,
-      22,    23
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    13,
+       6,     9,    11,     0,     1,     0,     0,     0,     2,     3,
+       0,     0,    19,    17,    18,    12,    14,     7,     4,     5,
+       8,    10,     0,     0,    15,    16
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -30,   -30,    38,    39,    40,    41,    42,   -15,   -29
+     -15,   -15,    29,    30,    -4,   -14
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     6,     7,     8,     9,    10,    11,    36,    37
+       0,     6,     7,     8,    25,    26
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -671,48 +663,42 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      17,    47,    48,    18,    19,     3,     4,     5,     1,     2,
-       3,     4,     5,    33,    34,    35,    45,    46,    50,    51,
-      12,    13,    14,    15,     0,    16,     0,    25,    26,    27,
-      28,    29,    30,    38,    31,    32,     0,    39,    40,    41,
-      42,    43,    44,    49,    20,    21,    22,    23,    24
+      14,    32,    33,     1,    15,     3,     4,     5,     1,     2,
+       3,     4,     5,    22,    23,    24,    30,    31,    34,    35,
+       9,    10,    11,    12,     0,    13,     0,    18,    19,     0,
+      20,    21,    27,    28,    29,    16,    17
 };
 
 static const yytype_int8 yycheck[] =
 {
        0,    12,    13,     3,     4,     5,     6,     7,     3,     4,
-       5,     6,     7,     7,     8,     9,    31,    32,    47,    48,
-       7,    10,     7,     7,    -1,    11,    -1,    10,    10,    10,
-      10,    10,    10,     7,    11,    11,    -1,    10,    10,    10,
-      10,    10,    10,    10,     6,     6,     6,     6,     6
+       5,     6,     7,     7,     8,     9,    20,    21,    32,    33,
+       7,    10,     7,     7,    -1,    11,    -1,    10,    10,    -1,
+      11,    11,    10,    10,    10,     6,     6
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,     4,     5,     6,     7,    15,    16,    17,    18,
-      19,    20,     7,    10,     7,     7,    11,     0,     3,     4,
-      16,    17,    18,    19,    20,    10,    10,    10,    10,    10,
-      10,    11,    11,     7,     8,     9,    21,    22,     7,    10,
-      10,    10,    10,    10,    10,    21,    21,    12,    13,    10,
-      22,    22
+       0,     3,     4,     5,     6,     7,    15,    16,    17,     7,
+      10,     7,     7,    11,     0,     4,    16,    17,    10,    10,
+      11,    11,     7,     8,     9,    18,    19,    10,    10,    10,
+      18,    18,    12,    13,    19,    19
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    14,    15,    15,    15,    15,    15,    15,    15,    15,
-      15,    15,    15,    15,    15,    15,    16,    17,    18,    19,
-      20,    21,    21,    21,    22,    22,    22
+       0,    14,    15,    15,    15,    15,    15,    15,    16,    16,
+      16,    16,    16,    17,    18,    18,    18,    19,    19,    19
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     2,     2,     2,     2,     2,     2,     3,     3,
-       3,     3,     3,     3,     4,     3,     4,     4,     2,     2,
-       3,     1,     3,     3,     1,     1,     1
+       0,     2,     2,     2,     3,     3,     2,     3,     4,     2,
+       4,     2,     3,     2,     1,     3,     3,     1,     1,     1
 };
 
 
@@ -1175,181 +1161,135 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 2: /* principal: assignment ';'  */
-#line 46 "compiler.y"
-                                            {;}
-#line 1182 "y.tab.c"
-    break;
-
-  case 3: /* principal: IntDefinition ';'  */
-#line 47 "compiler.y"
-                                                    {;}
-#line 1188 "y.tab.c"
-    break;
-
-  case 4: /* principal: IntDefAssignment ';'  */
-#line 48 "compiler.y"
-                                                        {;}
-#line 1194 "y.tab.c"
-    break;
-
-  case 5: /* principal: FloatDefAssignament ';'  */
+  case 2: /* principal: Variables ';'  */
 #line 49 "compiler.y"
-                                                    {;}
-#line 1200 "y.tab.c"
+                                {;}
+#line 1168 "y.tab.c"
     break;
 
-  case 6: /* principal: FloatDefinition ';'  */
+  case 3: /* principal: Stamp ';'  */
 #line 50 "compiler.y"
-                                                        {;}
-#line 1206 "y.tab.c"
+                                    {;}
+#line 1174 "y.tab.c"
     break;
 
-  case 7: /* principal: exit_command ';'  */
+  case 4: /* principal: principal Variables ';'  */
 #line 51 "compiler.y"
-                                                        {exit(EXIT_SUCCESS);}
-#line 1212 "y.tab.c"
+                                                  {;}
+#line 1180 "y.tab.c"
     break;
 
-  case 8: /* principal: print identifier ';'  */
+  case 5: /* principal: principal Stamp ';'  */
+#line 52 "compiler.y"
+                                              {;}
+#line 1186 "y.tab.c"
+    break;
+
+  case 6: /* principal: exit_command ';'  */
 #line 53 "compiler.y"
-                        {
-				int t ;
-				int bucket = computeSymbolIndex((yyvsp[-1].id));
-				t=symbols.tip[bucket];
-				if(t==0) {printf("Printing %d",IsymbolVal((yyvsp[-1].id),symbols));}
-				else  {printf("ciao");printf("Printing %f",FsymbolVal((yyvsp[-1].id),symbols));}	
-			}
-#line 1224 "y.tab.c"
-    break;
-
-  case 9: /* principal: principal assignment ';'  */
-#line 60 "compiler.y"
-                                                   {;}
-#line 1230 "y.tab.c"
-    break;
-
-  case 10: /* principal: principal IntDefAssignment ';'  */
-#line 61 "compiler.y"
-                                                                {;}
-#line 1236 "y.tab.c"
-    break;
-
-  case 11: /* principal: principal IntDefinition ';'  */
-#line 62 "compiler.y"
-                                                      {;}
-#line 1242 "y.tab.c"
-    break;
-
-  case 12: /* principal: principal FloatDefAssignament ';'  */
-#line 63 "compiler.y"
-                                                            {;}
-#line 1248 "y.tab.c"
-    break;
-
-  case 13: /* principal: principal FloatDefinition ';'  */
-#line 64 "compiler.y"
-                                                        {;}
-#line 1254 "y.tab.c"
-    break;
-
-  case 14: /* principal: principal print identifier ';'  */
-#line 66 "compiler.y"
-                        {
-				int t ;
-				int bucket = computeSymbolIndex((yyvsp[-1].id));
-				t=symbols.tip[bucket];
-				printf("%d\n",t);
-				if(t==0) {printf("Printing %d",IsymbolVal((yyvsp[-1].id),symbols));}
-				else {printf("Printing %f",FsymbolVal((yyvsp[-1].id),symbols));}
-			}
-#line 1267 "y.tab.c"
-    break;
-
-  case 15: /* principal: principal exit_command ';'  */
-#line 74 "compiler.y"
                                                         {exit(EXIT_SUCCESS);}
-#line 1273 "y.tab.c"
+#line 1192 "y.tab.c"
     break;
 
-  case 16: /* IntDefAssignment: integer identifier '=' exp  */
-#line 78 "compiler.y"
-                                               { updateSymbolVal((yyvsp[-2].id),(yyvsp[0].num),0,&symbols); }
-#line 1279 "y.tab.c"
+  case 7: /* principal: principal exit_command ';'  */
+#line 54 "compiler.y"
+                                                        {exit(EXIT_SUCCESS);}
+#line 1198 "y.tab.c"
     break;
 
-  case 17: /* FloatDefAssignament: floatin identifier '=' exp  */
-#line 81 "compiler.y"
-                                                 { updateSymbolVal((yyvsp[-2].id),0,(yyvsp[0].num),&symbols); }
-#line 1285 "y.tab.c"
+  case 8: /* Variables: integer identifier '=' exp  */
+#line 58 "compiler.y"
+                                        { updateSymbolVal((yyvsp[-2].id),(yyvsp[0].num),0,&symbols); }
+#line 1204 "y.tab.c"
     break;
 
-  case 18: /* IntDefinition: integer identifier  */
-#line 84 "compiler.y"
-                                   {IAddSymbol((yyvsp[0].id),&symbols);}
-#line 1291 "y.tab.c"
+  case 9: /* Variables: integer identifier  */
+#line 59 "compiler.y"
+                                       {IAddSymbol((yyvsp[0].id),&symbols);}
+#line 1210 "y.tab.c"
     break;
 
-  case 19: /* FloatDefinition: floatin identifier  */
-#line 87 "compiler.y"
-                                     {FAddSymbol((yyvsp[0].id),&symbols);}
-#line 1297 "y.tab.c"
+  case 10: /* Variables: floatin identifier '=' exp  */
+#line 60 "compiler.y"
+                                               { updateSymbolVal((yyvsp[-2].id),0,(yyvsp[0].num),&symbols); }
+#line 1216 "y.tab.c"
     break;
 
-  case 20: /* assignment: identifier '=' exp  */
-#line 91 "compiler.y"
-                                {int t;
+  case 11: /* Variables: floatin identifier  */
+#line 61 "compiler.y"
+                                       {FAddSymbol((yyvsp[0].id),&symbols);}
+#line 1222 "y.tab.c"
+    break;
+
+  case 12: /* Variables: identifier '=' exp  */
+#line 62 "compiler.y"
+                                       {int t;
 								 int bucket = computeSymbolIndex((yyvsp[-2].id));
+								 if(symbols.intSym[bucket] == 0 && symbols.fsym[bucket] == 0){
+									UndefinedVariable((yyvsp[-2].id), yylineno);
+								 } 
 								 t=symbols.tip[bucket];
 								 if(t==0){updateSymbolVal((yyvsp[-2].id),(yyvsp[0].num),0,&symbols);}
 								 else if(t==1){updateSymbolVal((yyvsp[-2].id),0,(yyvsp[0].num),&symbols);}}
-#line 1307 "y.tab.c"
+#line 1235 "y.tab.c"
     break;
 
-  case 21: /* exp: term  */
-#line 98 "compiler.y"
+  case 13: /* Stamp: print identifier  */
+#line 74 "compiler.y"
+                        { // ogni volta che printo devo capire che tipo printare 
+				int t ; 
+				int bucket = computeSymbolIndex((yyvsp[0].id));						
+				t=symbols.tip[bucket];                                        //vado a leggere in tip 
+				if(t==0) {printf("Printing %d",IsymbolVal((yyvsp[0].id),symbols));}
+				else  {printf("Printing %f",FsymbolVal((yyvsp[0].id),symbols));}	
+			}
+#line 1247 "y.tab.c"
+    break;
+
+  case 14: /* exp: term  */
+#line 84 "compiler.y"
                                 {(yyval.num) = (yyvsp[0].num);}
-#line 1313 "y.tab.c"
+#line 1253 "y.tab.c"
     break;
 
-  case 22: /* exp: exp '+' term  */
-#line 99 "compiler.y"
+  case 15: /* exp: exp '+' term  */
+#line 85 "compiler.y"
                                 {(yyval.num) = (yyvsp[-2].num) + (yyvsp[0].num);}
-#line 1319 "y.tab.c"
+#line 1259 "y.tab.c"
     break;
 
-  case 23: /* exp: exp '-' term  */
-#line 100 "compiler.y"
+  case 16: /* exp: exp '-' term  */
+#line 86 "compiler.y"
                                 {(yyval.num) = (yyvsp[-2].num) - (yyvsp[0].num);}
-#line 1325 "y.tab.c"
+#line 1265 "y.tab.c"
     break;
 
-  case 24: /* term: IntNumber  */
-#line 103 "compiler.y"
+  case 17: /* term: IntNumber  */
+#line 90 "compiler.y"
                                 {(yyval.num) = (yyvsp[0].num);}
-#line 1331 "y.tab.c"
+#line 1271 "y.tab.c"
     break;
 
-  case 25: /* term: FloatNumber  */
-#line 104 "compiler.y"
+  case 18: /* term: FloatNumber  */
+#line 91 "compiler.y"
                                         {(yyval.num) = (yyvsp[0].Fnum);}
-#line 1337 "y.tab.c"
+#line 1277 "y.tab.c"
     break;
 
-  case 26: /* term: identifier  */
-#line 105 "compiler.y"
-                                                {		
+  case 19: /* term: identifier  */
+#line 93 "compiler.y"
+                {  //devo capire cosa mettere al posto della variabile quindi devo prima capire di che tipo è e poi restituire il relativ valore
 			int t;
-			int bucket = computeSymbolIndex((yyvsp[0].id));
+			int bucket = computeSymbolIndex((yyvsp[0].id)); 
 			t=symbols.tip[bucket];
 			if(t==0) {(yyval.num)= IsymbolVal((yyvsp[0].id),symbols);}
 			else if(t==1) {(yyval.num)=FsymbolVal((yyvsp[0].id),symbols);}
 			}
-#line 1349 "y.tab.c"
+#line 1289 "y.tab.c"
     break;
 
 
-#line 1353 "y.tab.c"
+#line 1293 "y.tab.c"
 
       default: break;
     }
@@ -1542,12 +1482,13 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 114 "compiler.y"
-                     /* C code */
+#line 102 "compiler.y"
+                    
 
 int main (void) {
 
 	/* init symbol table */
+
 	int i;
 	for(i=0; i<52; i++) {
 		symbols.intSym[i] = 0;

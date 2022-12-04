@@ -1,11 +1,13 @@
 %{
 void yyerror (char *s);
 int yylex();
+extern int yylineno;
 
 #include <stdio.h>     /* C declarations used in actions */
 #include <stdlib.h>
 #include <ctype.h>
 #include "SymbolTable.h"
+#include "ErrorHandler.h"
 
 /*la mia symbol table è una struttura descritta dentro SymbolTable.h*/
 sym symbols;
@@ -37,65 +39,46 @@ sym symbols;
 
 /* Non terminali*/
 %type <num> principal exp term 
-%type <id> IntDefAssignment IntDefinition FloatDefinition FloatDefAssignament assignment
+%type <id> Variables Stamp
 
 %%
 
 /* descriptions of expected inputs     corresponding actions (in C) */
 
-principal	: assignment ';'            {;} 
-			| IntDefinition ';'         {;}
-			| IntDefAssignment ';'		{;}
-			| FloatDefAssignament ';'   {;}
-			| FloatDefinition ';'		{;}
+// regola principale
+principal	: Variables ';' {;}
+			| Stamp ';' {;}
+			| principal Variables ';' {;}
+			| principal Stamp ';' {;}
 			| exit_command ';'		{exit(EXIT_SUCCESS);} //lo mantengo solo per le prove
-			| print identifier ';'			
+			| principal exit_command ';'	{exit(EXIT_SUCCESS);}
+			;
+
+// regole di tutti i tipi di variabili
+Variables : integer identifier '=' exp  { updateSymbolVal($2,$4,0,&symbols); } // definizione + assegnazione (intero)
+		  | integer identifier {IAddSymbol($2,&symbols);} //definzione (intero)
+		  | floatin identifier '=' exp { updateSymbolVal($2,0,$4,&symbols); } //definzione + assegnazione (float)
+		  | floatin identifier {FAddSymbol($2,&symbols);} //definzione (float)
+		  | identifier '=' exp {int t;
+								 int bucket = computeSymbolIndex($1);
+								 if(symbols.intSym[bucket] == 0 && symbols.fsym[bucket] == 0){
+									UndefinedVariable($1, yylineno);
+								 } 
+								 t=symbols.tip[bucket];
+								 if(t==0){updateSymbolVal($1,$3,0,&symbols);}
+								 else if(t==1){updateSymbolVal($1,0,$3,&symbols);}} //assegnazione generica
+          ;
+
+//regole per la stampa
+Stamp : print identifier 			
 			{ // ogni volta che printo devo capire che tipo printare 
 				int t ; 
 				int bucket = computeSymbolIndex($2);						
 				t=symbols.tip[bucket];                                        //vado a leggere in tip 
 				if(t==0) {printf("Printing %d",IsymbolVal($2,symbols));}
-				else  {printf("ciao");printf("Printing %f",FsymbolVal($2,symbols));}	
+				else  {printf("Printing %f",FsymbolVal($2,symbols));}	
 			}
-			| principal assignment ';' {;}
-			| principal IntDefAssignment ';'	{;}
-			| principal IntDefinition ';' {;}
-			| principal FloatDefAssignament ';' {;}
-			| principal FloatDefinition ';' {;}
-			| principal print identifier ';'	
-			{
-				int t ;
-				int bucket = computeSymbolIndex($3);
-				t=symbols.tip[bucket];
-				printf("%d\n",t);
-				if(t==0) {printf("Printing %d",IsymbolVal($3,symbols));}
-				else {printf("Printing %f",FsymbolVal($3,symbols));}
-			}
-			| principal exit_command ';'	{exit(EXIT_SUCCESS);}
-			;
-
-/*operazione di definzione e assegnazione integer */
-IntDefAssignment : integer identifier '=' exp  { updateSymbolVal($2,$4,0,&symbols); }
-			;
-
-IntDefinition : integer identifier {IAddSymbol($2,&symbols);}
-			;
-
-/*operazione di definzione e assegnazione per float*/
-
-FloatDefinition : floatin identifier {FAddSymbol($2,&symbols);}
-				;
-
-FloatDefAssignament : floatin identifier '=' exp { updateSymbolVal($2,0,$4,&symbols); }
-					;
-
-/*Assegnamento generico (exmp a = a+1 )*/ 
-assignment : identifier '=' exp {int t;
-								 int bucket = computeSymbolIndex($1);
-								 t=symbols.tip[bucket];
-								 if(t==0){updateSymbolVal($1,$3,0,&symbols);}
-								 else if(t==1){updateSymbolVal($1,0,$3,&symbols);}}
-          ;
+		;
 
 /*macro Sottoparte di un'assegnazione*/
 exp    	: term                  {$$ = $1;}
@@ -107,7 +90,7 @@ exp    	: term                  {$$ = $1;}
 term   	: IntNumber             {$$ = $1;}
 		| FloatNumber           {$$ = $1;}
 		| identifier			
-		{//devo capire cosa mettere al posto della variabile quindi devo prima capire di che tipo è e poi restituire il relativ valore
+		{  //devo capire cosa mettere al posto della variabile quindi devo prima capire di che tipo è e poi restituire il relativ valore
 			int t;
 			int bucket = computeSymbolIndex($1); 
 			t=symbols.tip[bucket];
