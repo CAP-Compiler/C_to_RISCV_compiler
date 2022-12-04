@@ -124,3 +124,12 @@ Compile it:
 `./a.out < hello-text`
 
 **Output**: `The number of hellos is = 4 The number of lines is= 5`
+
+#####################################################################################
+
+This was just a simple example on how flex is supposed to work. Just the fundamentals.
+
+
+Now it is time to start using Bison , the parser.
+
+## Bison 
