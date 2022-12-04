@@ -132,4 +132,41 @@ This was just a simple example on how flex is supposed to work. Just the fundame
 
 Now it is time to start using Bison , the parser.
 
-## Bison 
+## Second Step
+
+**Understanding Yacc/Bison**
+
+As stated in the ["Compiler Construction using Flex and Bison" by Anthony A. Bay](https://www.admb-project.org/tools/flex/compiler.pdf):
+
+>Yacc and Bison are tools for generating parsers: programs which recognize the structure grammatical structure of programs. Bison is a faster version of Yacc.
+
+
+The main part is to understand how the syntax of *rules*  work in Bison.
+
+A typical ``.y`` ending file(bison parser) has this syntax
+
+````
+%{
+
+C code
+
+%}
+
+%token declaration
+
+%%
+
+Grammar rules and actions
+%%
+
+C subroutines
+
+
+````
+
+Let's make an **example**
+
+We want to code a simple scanner/parser that can 
+
+
+
